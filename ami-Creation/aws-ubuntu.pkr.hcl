@@ -8,9 +8,9 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = "learn-packer-linux-aws-ubuntutest"
-  instance_type = "t2.micro"
-  region        = "ap-south-1"
+  ami_name      = var.ami_name
+  instance_type = var.instance_type
+  region        = var.region
   source_ami_filter {
     filters = {
       name                = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
@@ -20,13 +20,18 @@ source "amazon-ebs" "ubuntu" {
     most_recent = true
     owners      = ["099720109477"]
   }
-  ssh_username = "ubuntu"
-}
-build {
-  name = "learn-packer"
-  sources = [
-    "source.amazon-ebs.ubuntu"
-  ]
+  ssh_username = var.ssh_username
 }
 
-#packer build -var-file="variables.pkrvars.hcl" .
+build {
+  name    = "learn-packer"
+  sources = ["source.amazon-ebs.ubuntu"]
+
+provisioner "shell" {
+    inline = [
+      "echo Installing Updates",
+      "sudo apt-get update -y",
+      "sudo apt-get install -y nginx"
+    ]
+  }
+  }
